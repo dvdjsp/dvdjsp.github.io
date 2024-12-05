@@ -2,7 +2,7 @@
 layout: about
 title: about
 permalink: /
-subtitle: <a href='https://www.ualberta.ca/en/physics/research/theoretical-physics-institute/index.html'>Theoretical Physics Institute, University of Alberta</a>
+subtitle: <a href='https://www.ualberta.ca/en/physics/research/theoretical-physics-institute/index.html'> Theoretical Physics Institute, University of Alberta</a>
 
 profile:
   align: right
