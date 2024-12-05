@@ -1,6 +1,6 @@
 ---
 layout: default
-permalink: /ramblings/
+permalink: /blog/
 title: Ramblings
 nav: true
 nav_order: 1
