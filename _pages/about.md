@@ -12,7 +12,7 @@ profile:
     <p>Centennial Centre for Interdisciplinary Science (CCIS)</p>
     <p>3-143</p>
     <p>Edmonton, Alberta, Canada</p>
-    <a href="mailto:dd@ualberta.ca">dd5 (at) ualberta (dot) ca </a>
+    <p> dd5 (at) ualberta (dot) ca </p>
 
 news: false # includes a list of news items
 selected_papers: false # includes a list of papers marked as "selected={true}"
