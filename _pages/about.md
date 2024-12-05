@@ -18,4 +18,4 @@ selected_papers: false # includes a list of papers marked as "selected={true}"
 social: false # includes social icons at the bottom of the page
 ---
 
-Master's Student in Physics at the University of Alberta under [Dr. Igor Boettcher](https://sites.ualberta.ca/~iboettch/) working in Condensed Matter Theory. You can find me [CV here](DavidsonCV.jpg)
+Master's Student in Physics at the University of Alberta under [Dr. Igor Boettcher](https://sites.ualberta.ca/~iboettch/) working in Condensed Matter Theory. You can find me [CV here](DavidsonCV.pdf)
