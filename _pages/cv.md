@@ -1,6 +1,6 @@
 ---
 layout: cv
-permalink: /CV/
+permalink: /cd/
 title: Condensed CV
 nav: true
 nav_order: 5
