@@ -9,7 +9,8 @@ profile:
   image: prof_pic.jpg
   image_circular: false # crops the image to make it circular
   more_info: >
-    <p>Centennial Centre for Interdisciplinary Science (CCIS)</p>
+    <p>Centennial Centre for</p>
+    <p>Interdisciplinary Science (CCIS)</p>
     <p>3-143</p>
     <p>Edmonton, Alberta, Canada</p>
     <p> dd5 (at) ualberta (dot) ca </p>
