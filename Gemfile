@@ -1,4 +1,4 @@
-source 'http://rubygems.org'source 
+source 'https://rubygems.org'source 
 group :jekyll_plugins do
     gem 'classifier-reborn'
     gem 'jekyll'
