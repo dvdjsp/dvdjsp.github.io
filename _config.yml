@@ -2,10 +2,10 @@
 # Site settings
 # -----------------------------------------------------------------------------
 
-itle: blank # the website title (if blank, full name will be used instead)
-first_name: Davidson
-middle_name: Noby
-last_name: Joseph
+title: Davidson Noby Joseph # the website title (if blank, full name will be used instead)
+first_name: #
+middle_name: #
+last_name: #
 email: dd5@ualberta.ca
 description: > # the ">" symbol means to ignore newlines until "footer_text:"
   A Curious Grad Student in Physics
