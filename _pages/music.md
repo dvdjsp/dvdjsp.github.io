@@ -1,12 +1,8 @@
 ---
 layout: page
-permalink: /teaching/
-title: Teaching & Resources
-description: Materials for courses you taught. Replace this text with your description.
+permalink: /music/
+title: Music
+description: When I'm not tryinng usually trying to solve for eigenvalues as a physicist, I try to be a bassist. I'm a member of the New Standards Music collective in Edmonton and part of the music scene here. I frequent the open jam sessions held very Wednesday by New Standdards Music! Here are some snippets of all the fun I've had: 
 nav: true
 nav_order: 6
 ---
-
-For now, this page is assumed to be a static description of your courses. You can convert it to a collection similar to `_projects/` so that you can have a dedicated page for each course.
-
-Organize your courses by years, topics, or universities, however you like!
