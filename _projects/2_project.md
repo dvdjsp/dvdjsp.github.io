@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Ising Model on Archimedean Lattices
-description: Free Energy Per Site
+description: We compute the Free Energy Per Site for these Archimedean Lattices
 img: 
 importance: 2
 category: work
