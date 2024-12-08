@@ -135,7 +135,7 @@ bing_site_verification: # out your bing-site-verification ID (Bing Webmaster)
 # Blog
 # -----------------------------------------------------------------------------
 
-blog_name: Ramblings about Physics & Math # blog_name will be displayed in your blog page
+blog_name: On The Beauty of Why # blog_name will be displayed in your blog page
 blog_description: A space for cool math/physics stuff I learned and want to share!
 permalink: /blog/:year/:title/
 lsi: false # produce an index for related posts
