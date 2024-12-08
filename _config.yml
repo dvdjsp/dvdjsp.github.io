@@ -2,7 +2,8 @@
 # Site settings
 # -----------------------------------------------------------------------------
 # IF YOU TURN REPO TO PRIVATE, MAKE SURE TO >>SET DEPLOYMENT BRANCH<< TO gh-pages 
-
+# For a generic test site check out https://alshedivat.github.io/al-folio/publications/
+# Original git repo: https://github.com/alshedivat/al-folio
 title: Davidson Noby Joseph # the website title (if blank, full name will be used instead)
 first_name: #
 middle_name: #
