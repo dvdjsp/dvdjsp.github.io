@@ -5,7 +5,7 @@ description: Free Energy Per Site & Counting Loops
 img: 
 importance: 2
 category: work
-giscus_comments: true
+giscus_comments: false
 ---
 
 Under Construction 🛠️
