@@ -12,8 +12,9 @@ profile:
     <p>Centennial Centre for</p>
     <p>Interdisciplinary Science </p>
     <p>CCIS 3-143</p>
-    <p>Edmonton, Alberta, Canada</p>
+    <p>Edmonton AB, Canada</p>
     <p> dd5(at)ualberta(dot)ca </p>
+    <a href='https://github.com/dvdjsp/'> GitHub </a>
 
 news: false # includes a list of news items
 selected_papers: false # includes a list of papers marked as "selected={true}"
