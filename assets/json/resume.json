@@ -20,13 +20,13 @@
     {
       "institution": "University of Alberta, Edmonton, Canada",
       "location": "Edmonton, Canada",
-      "url": "https://www.uzh.ch/",
-      "area": "Software Development",
+      "area": "Mathematical Physics",
       "studyType": "BSc",
       "startDate": "1/9/2019",
       "endDate": "31/8/2023",
       "GPA": "3.7/4.0",
-      "Specialization": ["Mathematical Physics"]
+      "Physics Senior Theis": "On Special Solutions of the Quasi-Einstein Equations",
+      "Math Senior Thesis": "On the Illumination of k-dimensional faces of the n-dimensional cube"
     }
   ],
   
