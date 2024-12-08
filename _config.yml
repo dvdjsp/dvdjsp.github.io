@@ -1,6 +1,7 @@
 # -----------------------------------------------------------------------------
 # Site settings
 # -----------------------------------------------------------------------------
+# IF YOU TURN REPO TO PRIVATE, MAKE SURE TO >>SET DEPLOYMENT BRANCH<< TO gh-pages 
 
 title: Davidson Noby Joseph # the website title (if blank, full name will be used instead)
 first_name: #
