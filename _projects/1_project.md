@@ -5,7 +5,7 @@ description: Density of States, Generating Functions, Continued Fraction
 img: assets/img/AL.png
 importance: 1
 category: work
-related_publications: true
+related_publications: false
 ---
 
 Under Construction 🛠️
