@@ -14,7 +14,7 @@ profile:
     <p>CCIS 3-143</p>
     <p>Edmonton AB, Canada</p>
     <p> dd5(at)ualberta(dot)ca </p>
-    <p> <a href='https://github.com/dvdjsp/'> GitHub </a> </p>
+    <p> <div> <a href='https://github.com/dvdjsp/'> GitHub </a> </div> </p>
 
 news: false # includes a list of news items
 selected_papers: false # includes a list of papers marked as "selected={true}"
