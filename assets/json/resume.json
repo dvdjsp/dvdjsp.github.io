@@ -20,12 +20,12 @@
     {
       "institution": "University of Alberta",
       "location": "Edmonton, Canada",
-      "area": "Condensed Matter Physics Physics",
+      "area": "Condensed Matter Physics",
       "studyType": "Master of Science",
       "startDate": "Sep. 2023",
       "endDate": "Present",
-      "GPA": "4.0/4.0",
-      "Research": "The Physics of Archimedean Lattices"
+      "GPA": "GPA: 4.0/4.0",
+      "research": "Band Theory on Archimedean Lattices"
     },
      {
       "institution": "University of Alberta",
@@ -34,9 +34,9 @@
       "studyType": "Bachelor's of Science (First Class Honors)",
       "startDate": "Sep. 2019",
       "endDate": "Aug. 2023",
-      "GPA": "3.7/4.0",
-      "Physics Senior Thesis": "On Special Solutions of the Quasi-Einstein Equations",
-      "Math Senior Thesis": "On the Illumination of k-dimensional faces of the n-dimensional cube"
+      "GPA": "GPA: 3.7/4.0",
+      "research": "On Special Solutions of the Quasi-Einstein Equations (Physics Senior Thesis)",
+      "research": "On the Illumination of k-dimensional faces of the n-dimensional cube (Math Senior Thesis)"
     }
   ], 
   "languages": [
