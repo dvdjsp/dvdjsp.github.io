@@ -1,8 +1,8 @@
 ---
 layout: react-page
-title: React Test
-permalink: /react-test/
-jsx_script: /assets/js/test-component.jsx
+title: React Test (Plain JS)
+permalink: /react-plain/
+js_script: /assets/js/test-component-compiled.js
 ---
 
-This is a simple test page to verify React is working correctly.
+This page tests React without using JSX.
