@@ -2252,4 +2252,12 @@ function MagnetizationCalculator() {
 }
 
 export default MagnetizationCalculator;
-ReactDOM.createRoot(document.getElementById('react-root')).render(<MagnetizationCalculator />);
+// Add at the end of Working_Ising.jsx
+document.addEventListener('DOMContentLoaded', function() {
+  const rootElement = document.getElementById('react-root');
+  if (rootElement) {
+    ReactDOM.createRoot(rootElement).render(<MagnetizationCalculator />);
+  } else {
+    console.error("Could not find #react-root element");
+  }
+});
