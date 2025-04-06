@@ -1,8 +1,7 @@
 ---
 layout: react-page
-title: React Test (Plain JS)
-permalink: /react-plain/
-js_script: /assets/js/test-component-compiled.js
+title: React Test
+permalink: /react-test/
 ---
 
-This page tests React without using JSX.
+This page tests a React component using vanilla JavaScript (no JSX).
