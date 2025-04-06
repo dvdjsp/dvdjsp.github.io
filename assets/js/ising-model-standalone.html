@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ising Model Simulation</title>
+  
+  <!-- Load React -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  
+  <!-- Load D3 and Recharts -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/recharts@2.7.2/umd/Recharts.min.js"></script>
+  
+  <!-- Babel for JSX -->
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+  
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+    .border {
+      border: 1px solid #ccc;
+    }
+    .rounded {
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  
+  <!-- Your Ising Model code as a script with type="text/babel" -->
+  <script type="text/babel">
+    // Paste your entire Working_Ising.jsx code here, unmodified
+    
+    // At the very end, add this line to render:
+    ReactDOM.createRoot(document.getElementById('root')).render(<MagnetizationCalculator />);
+  </script>
+</body>
+</html>
