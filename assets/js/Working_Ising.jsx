@@ -2252,3 +2252,4 @@ function MagnetizationCalculator() {
 }
 
 export default MagnetizationCalculator;
+ReactDOM.createRoot(document.getElementById('react-root')).render(<MagnetizationCalculator />);
