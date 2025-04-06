@@ -2033,3 +2033,14 @@ function MagnetizationCalculator() {
   }, /*#__PURE__*/React.createElement("strong", null, "Known theoretical values:"), " Square lattice Tc \u2248 2.27, Triangular lattice Tc \u2248 3.64, Hexagonal lattice Tc \u2248 1.52.")));
 }
 export default MagnetizationCalculator;
+// Add this to the very end of your ising.js file, after the export line
+document.addEventListener('DOMContentLoaded', function() {
+  const container = document.getElementById('ising-container');
+  if (container) {
+    const root = ReactDOM.createRoot(container);
+    root.render(React.createElement(MagnetizationCalculator, null));
+    console.log("Ising model rendered successfully!");
+  } else {
+    console.error("Could not find #ising-container element");
+  }
+});
