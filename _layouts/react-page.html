@@ -9,17 +9,15 @@ layout: default
   </header>
 
   <article>
-    <div id="react-root"></div>
+    <div id="react-root" style="min-height: 150px; border: 1px dashed #ccc; padding: 10px;"></div>
     {{ content }}
   </article>
 
-  <!-- Load all dependencies in the correct order -->
+  <!-- Load dependencies in proper order -->
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <!-- Remove defer from babel -->
   <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
-  <script src="https://unpkg.com/d3@7/dist/d3.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/recharts@2.7.2/umd/Recharts.min.js"></script>
-  
-  <!-- Load your JSX with defer to ensure dependencies load first -->
-  <script type="text/babel" src="{{ page.jsx_script | relative_url }}" defer></script>
+  <!-- Remove defer from your component -->
+  <script type="text/babel" src="{{ page.jsx_script | relative_url }}"></script>
 </div>
