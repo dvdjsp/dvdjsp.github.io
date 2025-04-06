@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ising Model Simulation</title>
+  
+  <!-- Load all required libraries -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/recharts@2.7.2/umd/Recharts.min.js"></script>
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+  
+  <!-- Tailwind-like utility classes for styling -->
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+    .border { border: 1px solid #ccc; }
+    .rounded { border-radius: 4px; }
+    .flex { display: flex; }
+    .flex-col { flex-direction: column; }
+    .gap-2 { gap: 0.5rem; }
+    .gap-4 { gap: 1rem; }
+    .mt-2 { margin-top: 0.5rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .p-4 { padding: 1rem; }
+    .p-3 { padding: 0.75rem; }
+    .p-2 { padding: 0.5rem; }
+    .bg-white { background-color: white; }
+    .bg-gray-100 { background-color: #f7fafc; }
+    .bg-blue-500 { background-color: #4299e1; }
+    .bg-blue-600 { background-color: #3182ce; }
+    .bg-red-500 { background-color: #f56565; }
+    .bg-red-600 { background-color: #e53e3e; }
+    .bg-green-500 { background-color: #48bb78; }
+    .bg-green-600 { background-color: #38a169; }
+    .bg-yellow-500 { background-color: #ecc94b; }
+    .bg-purple-600 { background-color: #805ad5; }
+    .bg-purple-700 { background-color: #6b46c1; }
+    .text-white { color: white; }
+    .text-black { color: black; }
+    .w-full { width: 100%; }
+    .h-full { height: 100%; }
+    .font-bold { font-weight: bold; }
+    .font-semibold { font-weight: 600; }
+    .text-xl { font-size: 1.25rem; }
+    .text-sm { font-size: 0.875rem; }
+    .text-xs { font-size: 0.75rem; }
+    .text-center { text-align: center; }
+    .text-gray-500 { color: #a0aec0; }
+    .text-gray-600 { color: #718096; }
+    .rounded-lg { border-radius: 0.5rem; }
+    .shadow-md { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+    .justify-center { justify-content: center; }
+    .justify-between { justify-content: space-between; }
+    .flex-wrap { flex-wrap: wrap; }
+    .grid { display: grid; }
+    .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .hover\:bg-blue-600:hover { background-color: #3182ce; }
+    .hover\:bg-red-600:hover { background-color: #e53e3e; }
+    .hover\:bg-green-600:hover { background-color: #38a169; }
+    .hover\:bg-yellow-600:hover { background-color: #d69e2e; }
+    .hover\:bg-gray-800:hover { background-color: #2d3748; }
+    .hover\:bg-gray-100:hover { background-color: #f7fafc; }
+    .hover\:bg-purple-700:hover { background-color: #6b46c1; }
+    .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+    .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+    .px-4 { padding-left: 1rem; padding-right: 1rem; }
+    .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .cursor-not-allowed { cursor: not-allowed; }
+    .h-96 { height: 24rem; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  
+  <script type="text/babel">
+    // Replace imports with global objects
+    const React = window.React;
+    const { useState, useEffect, useRef } = React;
+    const ReactDOM = window.ReactDOM;
+    const d3 = window.d3;
+    const { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine, Label, ResponsiveContainer } = window.Recharts;
+    
+    // Copy your Ising model class and related code without the imports
+    class IsingModel {
+      constructor(adjacencyMatrix) {
+        // Make sure we have a valid adjacency matrix
+        if (!adjacencyMatrix || adjacencyMatrix.length === 0) {
+          throw new Error("Invalid adjacency matrix");
+        }
+        
+        this.adjacencyMatrix = adjacencyMatrix;
+        this.numNodes = adjacencyMatrix.length;
+        
+        // Initialize spins with a more controlled distribution (50/50)
+        this.state = Array(this.numNodes).fill().map((_, i) => 
+          i % 2 === 0 ? 1 : -1 // Alternating pattern to ensure good distribution
+        );
+        
+        // Then shuffle the array to avoid any spatial patterns
+        this.shuffleSpins();
+        
+        this.J = -1.0; // Ferromagnetic coupling
+        
+        // IMPROVED: Verify and pre-compute neighbor lists
+        this.verifyAndComputeNeighbors();
+        
+        // Calculate initial energy
+        this.energy = this.calculateTotalEnergy();
+        
+        // Debug info
+        console.log(`Initialized Ising model with ${this.numNodes} nodes`);
+        console.log(`Total initial connections: ${this.getTotalConnections()}`);
+        console.log(`Average connections per node: ${this.getAverageConnections().toFixed(2)}`);
+      }
+      
+      // Include all the other methods from the IsingModel class
+      
+      // Utility to shuffle spins randomly
+      shuffleSpins() {
+        // Fisher-Yates shuffle
+        for (let i = this.state.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [this.state[i], this.state[j]] = [this.state[j], this.state[i]];
+        }
+      }
+      
+      // Enhanced debug method to get total connections
+      getTotalConnections() {
+        return this.neighbors.reduce((total, node) => total + node.indices.length, 0);
+      }
+      
+      // Enhanced debug method to get average connections per node
+      getAverageConnections() {
+        return this.getTotalConnections() / this.numNodes;
+      }
+      
+      // IMPROVED: Verify and compute neighbors with additional checks
+      verifyAndComputeNeighbors() {
+        this.neighbors = [];
+        let totalConnections = 0;
+        let disconnectedNodes = 0;
+        
+        for (let i = 0; i < this.numNodes; i++) {
+          const neighbors = [];
+          const couplings = [];
+          
+          for (let j = 0; j < this.numNodes; j++) {
+            // Skip self-connections (diagonal elements)
+            if (i === j) continue;
+            
+            // Check if there is a connection
+            if (this.adjacencyMatrix[i][j] !== 0) {
+              neighbors.push(j);
+              couplings.push(this.adjacencyMatrix[i][j]);
+            }
+          }
+          
+          this.neighbors.push({ indices: neighbors, couplings: couplings });
+          
+          totalConnections += neighbors.length;
+          if (neighbors.length === 0) {
+            disconnectedNodes++;
+          }
+        }
+        
+        if (disconnectedNodes > 0) {
+          console.warn(`Warning: ${disconnectedNodes} nodes have no connections!`);
+        }
+        
+        console.log(`Verified graph: ${totalConnections} total connections, ${disconnectedNodes} isolated nodes`);
+      }
+      
+      // Calculate energy change from flipping spin at site index
+      calculateDeltaEnergy(siteIndex) {
+        const spin = this.state[siteIndex];
+        let energyContribution = 0;
+        
+        // Only iterate through actual neighbors instead of entire matrix
+        const { indices, couplings } = this.neighbors[siteIndex];
+        
+        for (let i = 0; i < indices.length; i++) {
+          const neighborIndex = indices[i];
+          const coupling = couplings[i];
+          
+          // Additional bounds check
+          if (neighborIndex >= 0 && neighborIndex < this.numNodes) {
+            energyContribution += coupling * this.state[neighborIndex];
+          } else {
+            console.error(`Invalid neighbor index: ${neighborIndex} for site ${siteIndex}`);
+          }
+        }
+        
+        // Energy change for flipping this spin
+        return -2 * this.J * spin * energyContribution;
+      }
+      
+      // Calculate total energy of the system
+      calculateTotalEnergy() {
+        let energy = 0;
+        
+        for (let i = 0; i < this.numNodes; i++) {
+          const { indices, couplings } = this.neighbors[i];
+          
+          for (let j = 0; j < indices.length; j++) {
+            // Safety check for valid index
+            if (indices[j] >= this.numNodes) continue;
+            
+            // Divide by 2 to avoid double counting
+            energy += -0.5 * this.J * this.state[i] * this.state[indices[j]] * couplings[j];
+          }
+        }
+        
+        return energy;
+      }
+      
+      // FIXED: Run simulation steps using Metropolis algorithm with proper scaling
+      simulationSteps(temperature, nSteps) {
+        // Scale nSteps to ensure each site has a chance to be updated
+        // We want on average nSteps update attempts per site
+        const totalAttempts = nSteps * this.numNodes;
+        
+        for (let attempt = 0; attempt < totalAttempts; attempt++) {
+          // Select a random site
+          const site = Math.floor(Math.random() * this.numNodes);
+          
+          // Calculate energy change if we flip the spin
+          const deltaE = this.calculateDeltaEnergy(site);
+          
+          // Accept or reject the flip based on Metropolis criterion
+          if (deltaE <= 0 || Math.random() < Math.exp(-deltaE / temperature)) {
+            this.state[site] *= -1;
+            this.energy += deltaE;
+          }
+        }
+        
+        return [...this.state];
+      }
+      
+      // Calculate magnetization (average spin)
+      calculateMagnetization() {
+        return this.state.reduce((sum, spin) => sum + spin, 0) / this.numNodes;
+      }
+      
+      // Calculate absolute magnetization
+      calculateAbsoluteMagnetization() {
+        return Math.abs(this.calculateMagnetization());
+      }
+    }
+
+    // Copy the parseCSVToAdjacencyMatrix function
+    const parseCSVToAdjacencyMatrix = (csvText) => {
+      // Implementation as in your code
+      try {
+        const lines = csvText.trim().split('\n');
+        let maxRowCol = 0;
+        const entries = [];
+        
+        console.log(`Processing ${lines.length} lines from CSV file`);
+        
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i].trim();
+          if (!line || line.startsWith('#')) continue; // Skip empty lines or comments
+          
+          const parts = line.split(',').map(part => part.trim());
+          if (parts.length < 3) {
+            console.error(`Invalid line format at line ${i+1}: ${line}`);
+            continue;
+          }
+          
+          const row = parseInt(parts[0], 10);
+          const col = parseInt(parts[1], 10);
+          const value = parseFloat(parts[2]);
+          
+          if (isNaN(row) || isNaN(col) || isNaN(value)) {
+            console.error(`Invalid numeric values at line ${i+1}: ${line}`);
+            continue;
+          }
+          
+          // Validate row and column indices (must be positive)
+          if (row <= 0 || col <= 0) {
+            console.error(`Invalid row/column indices (must be > 0) at line ${i+1}: ${line}`);
+            continue;
+          }
+          
+          maxRowCol = Math.max(maxRowCol, row, col);
+          entries.push({ row, col, value });
+        }
+        
+        if (entries.length === 0) {
+          throw new Error("No valid entries found in CSV file");
+        }
+        
+        console.log(`Found ${entries.length} valid connections with max index ${maxRowCol}`);
+        
+        // Initialize adjacency matrix with zeros
+        const adjMatrix = Array(maxRowCol).fill().map(() => Array(maxRowCol).fill(0));
+        
+        // Fill in the matrix (Mathematica indices are 1-based)
+        entries.forEach(({ row, col, value }) => {
+          // Convert from 1-based to 0-based indices
+          const r = row - 1;
+          const c = col - 1;
+          
+          // Check for valid indices
+          if (r < 0 || r >= maxRowCol || c < 0 || c >= maxRowCol) {
+            console.error(`Invalid indices after conversion: ${r}, ${c}`);
+            return;
+          }
+          
+          adjMatrix[r][c] = value;
+          
+          // IMPORTANT: Ensure matrix is symmetric (undirected graph)
+          // This is critical for the Ising model to work correctly
+          adjMatrix[c][r] = value;
+        });
+        
+        // Validate matrix
+        let totalConnections = 0;
+        let disconnectedNodes = 0;
+        
+        for (let i = 0; i < maxRowCol; i++) {
+          let hasConnection = false;
+          for (let j = 0; j < maxRowCol; j++) {
+            if (i !== j && adjMatrix[i][j] !== 0) {
+              hasConnection = true;
+              totalConnections++;
+            }
+          }
+          if (!hasConnection) {
+            disconnectedNodes++;
+          }
+        }
+        
+        console.log(`Adjacency matrix created: ${maxRowCol}x${maxRowCol} with ${totalConnections} total connections`);
+        if (disconnectedNodes > 0) {
+          console.warn(`Warning: ${disconnectedNodes} nodes appear to be isolated!`);
+        }
+        
+        return adjMatrix;
+      } catch (error) {
+        console.error("Error parsing CSV:", error);
+        throw new Error(`Failed to parse CSV: ${error.message}`);
+      }
+    };
+
+    // Copy the StaticIsingView component
+    function StaticIsingView({ adjacencyMatrix, spins, positions }) {
+      const svgRef = useRef(null);
+      const [transform, setTransform] = useState(null);
+      
+      // One-time initialization of the static view
+      useEffect(() => {
+        if (!svgRef.current || !positions || !positions.length || !adjacencyMatrix) return;
+        
+        console.log(`Initializing static view with ${positions.length} positions and ${spins.length} spins`);
+        const svg = d3.select(svgRef.current);
+        svg.selectAll('*').remove();
+        
+        // Create a container for all elements
+        const g = svg.append('g')
+          .attr('class', 'static-container');
+        
+        // Create zoom behavior that only affects the transform
+        const zoom = d3.zoom()
+          .scaleExtent([0.1, 10])
+          .on('zoom', (event) => {
+            g.attr('transform', event.transform);
+            setTransform(event.transform);
+          });
+        
+        svg.call(zoom);
+        
+        // Draw the links - ensure we have positions for both ends
+        const links = [];
+        for (let i = 0; i < adjacencyMatrix.length; i++) {
+          for (let j = i + 1; j < adjacencyMatrix.length; j++) {
+            if (adjacencyMatrix[i][j] !== 0) {
+              const source = positions[i];
+              const target = positions[j];
+              if (source && target) {
+                // Store original indices to ensure proper mapping
+                links.push({ 
+                  source: source, 
+                  target: target,
+                  sourceId: i,
+                  targetId: j
+                });
+              }
+            }
+          }
+        }
+        
+        g.selectAll('.static-link')
+          .data(links)
+          .enter()
+          .append('line')
+          .attr('class', 'static-link')
+          .attr('x1', d => d.source.x)
+          .attr('y1', d => d.source.y)
+          .attr('x2', d => d.target.x)
+          .attr('y2', d => d.target.y)
+          .attr('stroke', '#999')
+          .attr('stroke-width', 1);
+        
+        // Draw the nodes with initial colors and store the node index
+        // CRITICAL: We need to ensure node data has the correct id 
+        const nodeData = positions.map((pos, i) => ({
+          ...pos,
+          nodeId: i,  // Store the original index for mapping to spin array
+          spin: spins[i] || 0  // Initial spin state
+        }));
+        
+        g.selectAll('.static-node')
+          .data(nodeData)
+          .enter()
+          .append('circle')
+          .attr('class', 'static-node')
+          .attr('r', 8)
+          .attr('cx', d => d.x)
+          .attr('cy', d => d.y)
+          .attr('data-node-id', d => d.nodeId)  // Store index as data attribute
+          .attr('stroke', '#333')
+          .attr('stroke-width', 1)
+          .attr('fill', d => d.spin === 1 ? 'black' : 'white');  // Initial color
+        
+        // Calculate bounding box for initial fit
+        const width = svgRef.current.clientWidth;
+        const height = svgRef.current.clientHeight;
+        
+        // Find the bounds of the graph
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        positions.forEach(pos => {
+          minX = Math.min(minX, pos.x);
+          minY = Math.min(minY, pos.y);
+          maxX = Math.max(maxX, pos.x);
+          maxY = Math.max(maxY, pos.y);
+        });
+        
+        // Add padding
+        const padding = 40;
+        minX -= padding;
+        minY -= padding;
+        maxX += padding;
+        maxY += padding;
+        
+        const graphWidth = maxX - minX;
+        const graphHeight = maxY - minY;
+        if (graphWidth > 0 && graphHeight > 0) {
+          const scale = 0.9 * Math.min(width / graphWidth, height / graphHeight);
+          const tx = width / 2 - (minX + graphWidth / 2) * scale;
+          const ty = height / 2 - (minY + graphHeight / 2) * scale;
+          
+          // Initial transform to fit the graph
+          const initialTransform = d3.zoomIdentity.translate(tx, ty).scale(scale);
+          svg.call(zoom.transform, initialTransform);
+        }
+      }, [adjacencyMatrix, positions]);
+      
+      // CRITICAL FIX: This is the key part - update node colors based on proper mapping to spins
+      useEffect(() => {
+        if (!svgRef.current || !spins || !spins.length) return;
+        
+        // Count the distribution to verify proper updates
+        let blackCount = 0;
+        let whiteCount = 0;
+        
+        // Update node colors based on their stored node ID and the corresponding spin
+        d3.select(svgRef.current)
+          .selectAll('.static-node')
+          .attr('fill', function() {
+            // Get the node ID from the data attribute
+            const nodeId = parseInt(d3.select(this).attr('data-node-id'));
+            
+            // Get the spin state for this node
+            const spin = nodeId < spins.length ? spins[nodeId] : 0;
+            
+            // Update color counts for verification
+            if (spin === 1) blackCount++;
+            else whiteCount++;
+            
+            return spin === 1 ? 'black' : 'white';
+          });
+        
+        // Verify the distribution matches what we expect
+        const total = blackCount + whiteCount;
+        const blackRatio = blackCount / total;
+        console.log(`Spin distribution: ${blackCount}/${total} black (${(blackRatio*100).toFixed(1)}%), ${whiteCount}/${total} white`);
+        
+      }, [spins]);
+      
+      return (
+        <svg ref={svgRef} width="100%" height="700px" className="border rounded"></svg>
+      );
+    }
+
+    // Copy the GraphPreview component
+    function GraphPreview({ adjacencyMatrix, spins, onSvgRef }) {
+      // Your GraphPreview implementation
+      const svgRef = useRef(null);
+      const [isStretched, setIsStretched] = useState(false);
+      const simulationRef = useRef(null);
+      const [continuousSimulation, setContinuousSimulation] = useState(false);
+      const continuousTimerRef = useRef(null);
+      const [isShaking, setIsShaking] = useState(false);
+      const shakingTimerRef = useRef(null);
+      
+      // Make sure to provide svg ref to parent when it's ready
+      useEffect(() => {
+        if (svgRef.current && onSvgRef) {
+          onSvgRef(svgRef.current);
+        }
+      }, [svgRef.current, onSvgRef]);
+      
+      const toggleStretch = () => {
+        if (!simulationRef.current) {
+          console.log("No simulation to toggle");
+          return;
+        }
+        
+        // Toggle the stretched state
+        const newState = !isStretched;
+        setIsStretched(newState);
+        
+        const simulation = simulationRef.current;
+        
+        // Change force parameters based on new state
+        const forceStrength = newState ? -100 : -30;
+        const linkDistance = newState ? 60 : 30;
+        const springStrength = newState ? 0.05 : 0.3;
+        
+        // Update simulation parameters
+        simulation.force('charge').strength(forceStrength);
+        simulation.force('link')
+          .distance(linkDistance)
+          .strength(springStrength);
+        
+        // Restart the D3 layout simulation with high energy
+        simulation.alpha(1).restart();
+        
+        console.log(`Graph stretch toggled: ${newState ? 'Stretching' : 'Freezing'}`);
+      };
+      
+      // Add explicit function to stop the stretch simulation (D3 layout)
+      const stopStretch = () => {
+        console.log("Stopping graph stretch simulation");
+        
+        if (simulationRef.current) {
+          // Actually stop the D3 force simulation
+          simulationRef.current.stop();
+          
+          // Make sure we're in "frozen" state
+          setIsStretched(false);
+          
+          // Clear continuous simulation if active
+          if (continuousTimerRef.current) {
+            clearInterval(continuousTimerRef.current);
+            continuousTimerRef.current = null;
+          }
+          
+          // Clear shaking timer if active
+          if (shakingTimerRef.current) {
+            clearTimeout(shakingTimerRef.current);
+            shakingTimerRef.current = null;
+            setIsShaking(false);
+          }
+        }
+      };
+      
+      // Toggle continuous simulation mode
+      const toggleContinuousSimulation = () => {
+        const newState = !continuousSimulation;
+        setContinuousSimulation(newState);
+        
+        if (newState && simulationRef.current) {
+          // Start continuous simulation by periodically "reheating"
+          continuousTimerRef.current = setInterval(() => {
+            if (simulationRef.current && simulationRef.current.alpha() < 0.1) {
+              simulationRef.current.alpha(0.3).restart();
+            }
+          }, 2000); // Reheat every 2 seconds if alpha gets too low
+          
+          // Initial kick
+          simulationRef.current.alpha(0.5).restart();
+        } else {
+          // Stop continuous simulation
+          if (continuousTimerRef.current) {
+            clearInterval(continuousTimerRef.current);
+            continuousTimerRef.current = null;
+          }
+        }
+      };
+      
+      // Add a function to aggressively shake/untangle the graph
+      const shakeGraph = () => {
+        if (!simulationRef.current || isShaking) return;
+        
+        setIsShaking(true);
+        const simulation = simulationRef.current;
+        
+        // Store original force parameters
+        const originalChargeStrength = simulation.force('charge').strength()();
+        const originalLinkDistance = simulation.force('link').distance()();
+        const originalLinkStrength = simulation.force('link').strength()();
+        
+        // Apply very aggressive forces to untangle
+        simulation.force('charge').strength(-500); // Much stronger repulsion
+        
+        // Add jitter force if it doesn't exist
+        if (!simulation.force('jitter')) {
+          simulation.force('jitter', () => {
+            const nodes = simulation.nodes();
+            // Apply random forces to all nodes
+            nodes.forEach(node => {
+              node.vx = (node.vx || 0) + (Math.random() - 0.5) * 10;
+              node.vy = (node.vy || 0) + (Math.random() - 0.5) * 10;
+            });
+          });
+        }
+        
+        // Increase link distance dramatically
+        simulation.force('link')
+          .distance(d => originalLinkDistance * 3) // 3x the original distance
+          .strength(0.01); // Very weak springs during shaking
+        
+        // Heat up the simulation
+        simulation.alpha(1).restart();
+        
+        // Disable the shake button during shaking to prevent multiple clicks
+        const shakeDuration = 1500; // 1.5 seconds of violent shaking
+        
+        // After the shake period, gradually return to normal
+        shakingTimerRef.current = setTimeout(() => {
+          if (simulationRef.current) {
+            // Remove jitter force
+            simulation.force('jitter', null);
+            
+            // Gradually return to original parameters
+            simulation.force('charge').strength(originalChargeStrength);
+            simulation.force('link')
+              .distance(originalLinkDistance)
+              .strength(originalLinkStrength);
+            
+            // Keep simulation hot enough to continue moving
+            simulation.alpha(0.3).restart();
+          }
+          
+          setIsShaking(false);
+          shakingTimerRef.current = null;
+        }, shakeDuration);
+      };
+      
+      // Function to fit graph to screen
+      const fitToScreen = () => {
+        if (!svgRef.current || !simulationRef.current) return;
+        
+        const svg = d3.select(svgRef.current);
+        const g = svg.select('g');
+        const width = svgRef.current.clientWidth || 600;
+        const height = svgRef.current.clientHeight || 600;
+        
+        // Get current nodes from simulation
+        const nodes = simulationRef.current.nodes();
+        
+        // Find the bounds of the graph
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        nodes.forEach(node => {
+          if (node.x !== undefined) {
+            minX = Math.min(minX, node.x);
+            minY = Math.min(minY, node.y);
+            maxX = Math.max(maxX, node.x);
+            maxY = Math.max(maxY, node.y);
+          }
+        });
+        
+        // Add padding
+        const padding = 40;
+        minX -= padding;
+        minY -= padding;
+        maxX += padding;
+        maxY += padding;
+        
+        // Calculate zoom scale to fit the graph
+        const graphWidth = maxX - minX;
+        const graphHeight = maxY - minY;
+        if (graphWidth <= 0 || graphHeight <= 0) return;
+        
+        const scale = Math.min(width / graphWidth, height / graphHeight);
+        
+        // Calculate translation to center the graph
+        const translate = [
+          (width - graphWidth * scale) / 2 - minX * scale, 
+          (height - graphHeight * scale) / 2 - minY * scale
+        ];
+        
+        // Apply the transform with transition
+        svg.transition().duration(500).call(
+          d3.zoom().transform,
+          d3.zoomIdentity
+            .translate(translate[0], translate[1])
+            .scale(scale * 0.95) // Slightly smaller to ensure everything fits
+        );
+      };
+      
+      useEffect(() => {
+        if (!adjacencyMatrix || !svgRef.current) return;
+        
+        const width = svgRef.current.clientWidth || 600;
+        const height = svgRef.current.clientHeight || 600;
+        const nodeRadius = 8;
+        
+        // Calculate boundary scale factor based on adjacency matrix size
+        // More nodes = more space needed
+        const nodeCount = adjacencyMatrix.length;
+        const scaleFactor = Math.max(6, Math.min(20, Math.ceil(Math.sqrt(nodeCount) * 1.5)));
+        
+        // Create a virtual space that scales with graph size
+        const virtualWidth = width * scaleFactor;
+        const virtualHeight = height * scaleFactor;
+        
+        // Create nodes and links from adjacency matrix
+        const n = adjacencyMatrix.length;
+        const nodes = Array(n).fill().map((_, i) => ({ 
+          id: i,
+          // Initialize with random positions in a reasonable range
+          x: virtualWidth/2 + (Math.random() - 0.5) * virtualWidth * 0.5,
+          y: virtualHeight/2 + (Math.random() - 0.5) * virtualHeight * 0.5
+        }));
+        
+        const links = [];
+        for (let i = 0; i < n; i++) {
+          for (let j = i + 1; j < n; j++) {
+            if (adjacencyMatrix[i][j] !== 0) {
+              links.push({ source: i, target: j });
+            }
+          }
+        }
+        
+        // Create SVG elements
+        const svg = d3.select(svgRef.current);
+        svg.selectAll('*').remove();
+        
+        // Create group for links and nodes
+        const g = svg.append('g');
+        
+        // Create the links
+        const link = g.selectAll('.link')
+          .data(links)
+          .join('line')
+          .attr('class', 'link')
+          .attr('stroke', '#999')
+          .attr('stroke-width', 1);
+        
+        // Create the nodes with correct colors based on spins if available
+        const node = g.selectAll('.node')
+          .data(nodes)
+          .join('circle')
+          .attr('class', 'node')
+          .attr('r', nodeRadius)
+          .attr('fill', (d, i) => spins && i < spins.length ? (spins[i] === 1 ? 'black' : 'white') : '#000')
+          .attr('stroke', '#333')
+          .attr('stroke-width', 1);
+        
+        // Starting force parameters
+        const forceStrength = isStretched ? -100 : -30;
+        const linkDistance = isStretched ? 60 : 30;
+        const springStrength = isStretched ? 0.05 : 0.3;
+        
+        // Set up force simulation with lower alphaDecay to make it run longer
+        const simulation = d3.forceSimulation(nodes)
+          .force('link', d3.forceLink(links).id(d => d.id).distance(linkDistance).strength(springStrength))
+          .force('charge', d3.forceManyBody().strength(forceStrength))
+          .force('center', d3.forceCenter(virtualWidth / 2, virtualHeight / 2))
+          .velocityDecay(0.4) // Slightly higher damping to prevent excessive oscillation
+          .alphaDecay(0.005) // Slower decay for longer-running simulation
+          .alphaMin(0.0001); // Lower min alpha to let it run longer
+        
+        // Save reference to simulation
+        simulationRef.current = simulation;
+        
+        // Create a zoom behavior
+        const zoomBehavior = d3.zoom()
+          .scaleExtent([0.1, 4])
+          .on('zoom', (event) => {
+            g.attr('transform', event.transform);
+          });
+        
+        // Apply the zoom behavior to the SVG
+        svg.call(zoomBehavior);
+        
+        // Update positions on tick with scaled larger boundary
+        simulation.on('tick', () => {
+          link
+            .attr('x1', d => d.source.x)
+            .attr('y1', d => d.source.y)
+            .attr('x2', d => d.target.x)
+            .attr('y2', d => d.target.y);
+          
+          // Use boundary constraints with the virtual space
+          node
+            .attr('cx', d => d.x = Math.max(nodeRadius, Math.min(virtualWidth - nodeRadius, d.x)))
+            .attr('cy', d => d.y = Math.max(nodeRadius, Math.min(virtualHeight - nodeRadius, d.y)));
+        });
+        
+        // Initial stabilization
+        for (let i = 0; i < 300; i++) {
+          simulation.tick();
+        }
+        
+        // Fit the graph to the screen
+        setTimeout(fitToScreen, 100);
+        
+        // If continuous simulation mode is active, start the timer
+        if (continuousSimulation) {
+          toggleContinuousSimulation();
+        }
+        
+        // Cleanup on unmount
+        return () => {
+          if (simulationRef.current) {
+            simulationRef.current.stop();
+          }
+          
+          if (continuousTimerRef.current) {
+            clearInterval(continuousTimerRef.current);
+            continuousTimerRef.current = null;
+          }
+          
+          if (shakingTimerRef.current) {
+            clearTimeout(shakingTimerRef.current);
+            shakingTimerRef.current = null;
+          }
+        };
+      }, [adjacencyMatrix, spins]); 
+      
+      // Calculate scale factor for displaying in the UI
+      const nodeCount = adjacencyMatrix ? adjacencyMatrix.length : 0;
+      const displayScaleFactor = Math.max(6, Math.min(20, Math.ceil(Math.sqrt(nodeCount) * 1.5)));
+      
+      return (
+        <div className="flex flex-col h-full">
+          <svg ref={svgRef} width="100%" height="700px" className="border rounded"></svg>
+          <div className="flex flex-col gap-2">
+            <div className="flex mt-2 justify-between flex-wrap gap-2">
+              <button 
+                onClick={toggleStretch}
+                className={`text-sm py-2 px-3 rounded font-bold ${
+                  isStretched 
+                    ? 'bg-red-500 text-white' 
+                    : 'bg-blue-600 text-white'
+                }`}
+              >
+                {isStretched ? 'Freeze Graph' : 'Stretch Graph'}
+              </button>
+              
+              <button
+                onClick={shakeGraph}
+                disabled={isShaking}
+                className={`text-sm py-2 px-3 rounded font-bold ${
+                  isShaking 
+                    ? 'bg-purple-300 text-white cursor-not-allowed' 
+                    : 'bg-purple-600 text-white hover:bg-purple-700'
+                }`}
+              >
+                {isShaking ? 'Untangling...' : 'Untangle Graph!'}
+              </button>
+              
+              <button
+                onClick={toggleContinuousSimulation}
+                className={`text-sm py-2 px-3 rounded font-bold ${
+                  continuousSimulation 
+                    ? 'bg-green-600 text-white' 
+                    : 'bg-yellow-500 text-white'
+                }`}
+              >
+                {continuousSimulation ? 'Continuous: ON' : 'Continuous: OFF'}
+              </button>
+              
+              <button
+                onClick={stopStretch}
+                className="text-sm py-2 px-3 rounded bg-red-600 text-white font-bold"
+              >
+                Stop Stretch
+              </button>
+              
+              <button
+                onClick={fitToScreen}
+                className="text-sm py-2 px-3 rounded bg-gray-600 text-white font-bold"
+              >
+                Fit to Screen
+              </button>
+            </div>
+            <div className="text-xs text-gray-500 text-center">
+              Virtual boundary: {displayScaleFactor}x screen size ({nodeCount} nodes) | 
+              {isShaking ? " Untangling in progress... " : ""}
+              {continuousSimulation ? " Simulation will run continuously" : " Simulation will stop when stable"}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Copy the MagnetizationCalculator component (main component)
+    function MagnetizationCalculator() {
+      // Your MagnetizationCalculator implementation
+      // Include the full implementation here
+      
+      // Graph data
+      const [adjacencyMatrix, setAdjacencyMatrix] = useState(null);
+      const [graphStats, setGraphStats] = useState({ nodes: 0, edges: 0 });
+      const [isGraphLoaded, setIsGraphLoaded] = useState(false);
+      
+      // File upload state
+      const [fileError, setFileError] = useState(null);
+      
+      // Temperature parameters
+      const [tempMin, setTempMin] = useState(0.5);
+      const [tempMax, setTempMax] = useState(4.0);
+      const [tempPoints, setTempPoints] = useState(20);
+      
+      // ADDITIONS FOR DUAL VIEW:
+      const [nodePositions, setNodePositions] = useState([]);
+      const [showSimulationView, setShowSimulationView] = useState(false);
+      
+      // Ising model real-time simulation state
+      const [isRealTimeSimulating, setIsRealTimeSimulating] = useState(false);
+      const [simulationTemp, setSimulationTemp] = useState(1.5);
+      const [timeScale, setTimeScale] = useState(100); // Default 100 steps per frame
+      const [spins, setSpins] = useState([]);
+      const [magnetization, setMagnetization] = useState(0);
+      const [absoluteMagnetization, setAbsoluteMagnetization] = useState(0);
+      const [energy, setEnergy] = useState(0);
+      const isingModelRef = useRef(null);
+      const animationFrameRef = useRef(null);
+      const svgRef = useRef(null);
+      
+      // Removed Binder cumulant display toggle
+      const [useTwoStageSampling, setUseTwoStageSampling] = useState(true);
+      const [firstRunComplete, setFirstRunComplete] = useState(false);
+      const [initialTcEstimate, setInitialTcEstimate] = useState(null);
+      
+      // Simulation parameters
+      const [equilibrationSteps, setEquilibrationSteps] = useState(5000);
+      const [measurementSteps, setMeasurementSteps] = useState(500);
+      const [measurementTrials, setMeasurementTrials] = useState(50);
+      
+      // Calculation state
+      const [isCalculating, setIsCalculating] = useState(false);
+      const [progress, setProgress] = useState(0);
+      
+      // Set up default state for measurement data
+      const [magnetizationData, setMagnetizationData] = useState([]);
+      const [criticalTemp, setCriticalTemp] = useState(null);
+      const [calculationTime, setCalculationTime] = useState(0);
+      
+      // Abort controller for stopping calculations
+      const abortController = useRef(null);
+      
+      // Known critical temperatures for common lattices
+      const KNOWN_CRITICAL_TEMPS = {
+        grid: 2.27, // Square lattice
+        triangular: 3.64, // Triangular lattice 
+        hexagonal: 1.52  // Hexagonal lattice
+      };
+      
+      // Get reference to the SVG element from GraphPreview
+      const handleSvgRef = (ref) => {
+        svgRef.current = ref;
+      };
+      
+      // Capture node positions from the graph
+      const captureNodePositions = () => {
+        if (!svgRef.current) return [];
+        
+        // Extract positions directly from DOM
+        const positions = [];
+        const nodeElements = d3.select(svgRef.current).selectAll('.node');
+        
+        nodeElements.each(function(d, i) {
+          const node = d3.select(this);
+          positions[i] = {
+            id: i,
+            x: parseFloat(node.attr('cx')),
+            y: parseFloat(node.attr('cy'))
+          };
+        });
+        
+        console.log(`Captured ${positions.length} node positions`);
+        return positions;
+      };
+      
+      // Handle simulation temperature change
+      const handleSimulationTempChange = (e) => {
+        setSimulationTemp(parseFloat(e.target.value));
+      };
+      
+      // Handle time scale change
+      const handleTimeScaleChange = (e) => {
+        setTimeScale(parseInt(e.target.value, 10));
+      };
+      
+      // Initialize Ising model when graph is loaded
+      const initializeIsingModel = () => {
+        if (!adjacencyMatrix) return;
+        
+        isingModelRef.current = new IsingModel(adjacencyMatrix);
+        setSpins([...isingModelRef.current.state]);
+        setMagnetization(isingModelRef.current.calculateMagnetization());
+        setAbsoluteMagnetization(isingModelRef.current.calculateAbsoluteMagnetization());
+        setEnergy(isingModelRef.current.energy);
+      };
+      
+      // Toggle real-time Ising model simulation with dual view
+      const toggleRealTimeSimulation = () => {
+        console.log(`${isRealTimeSimulating ? 'Stopping' : 'Starting'} Ising magnet simulation`);
+        
+        // Initialize Ising model if needed
+        if (!isingModelRef.current && !isRealTimeSimulating) {
+          console.log("Initializing Ising model before simulation");
+          initializeIsingModel();
+        }
+        
+        if (!isRealTimeSimulating) {
+          // STARTING SIMULATION
+          
+          // Capture the current positions
+          const positions = captureNodePositions();
+          console.log(`Captured ${positions.length} node positions for static view`);
+          
+          // Store positions and switch to static view
+          setNodePositions(positions);
+          setShowSimulationView(true);
+          
+          // Make sure we have the current spin values
+          if (isingModelRef.current) {
+            setSpins([...isingModelRef.current.state]);
+          }
+        } else {
+          // STOPPING SIMULATION
+          
+          // Switch back to interactive view
+          setShowSimulationView(false);
+        }
+        
+        setIsRealTimeSimulating(!isRealTimeSimulating);
+      };
+      
+      // Include implementation of all remaining methods from MagnetizationCalculator
+      // Ising simulation effect for static view
+      useEffect(() => {
+        if (!isRealTimeSimulating || !isingModelRef.current) return;
+        
+        console.log("Starting Ising simulation loop");
+        
+        // Run initial steps to settle the system at the current temperature
+        isingModelRef.current.simulationSteps(simulationTemp, 200);
+        
+        // Update spins state after initial steps
+        setSpins([...isingModelRef.current.state]);
+        setMagnetization(isingModelRef.current.calculateMagnetization());
+        setAbsoluteMagnetization(isingModelRef.current.calculateAbsoluteMagnetization());
+        setEnergy(isingModelRef.current.energy);
+        
+        const runIsingSimulation = () => {
+          try {
+            // Use the timeScale slider value to determine steps per frame
+            const stepsPerFrame = Math.min(500, Math.max(50, timeScale));
+            
+            // Run simulation steps
+            isingModelRef.current.simulationSteps(simulationTemp, stepsPerFrame);
+            
+            // Keep a local copy of the updated spin states
+            const newSpins = [...isingModelRef.current.state];
+            
+            // Update React state (this will trigger a re-render of the static view)
+            setSpins(newSpins);
+            
+            // Update stats occasionally
+            if (Math.random() < 0.2) {
+              setMagnetization(isingModelRef.current.calculateMagnetization());
+              setAbsoluteMagnetization(isingModelRef.current.calculateAbsoluteMagnetization());
+              setEnergy(isingModelRef.current.energy);
+            }
+          } catch (error) {
+            console.error("Error in Ising simulation step:", error);
+            setIsRealTimeSimulating(false);
+            return;
+          }
+          
+          // Continue only if still simulating
+          if (isRealTimeSimulating) {
+            animationFrameRef.current = requestAnimationFrame(runIsingSimulation);
+          }
+        };
+        
+        // Start the Ising animation loop
+        animationFrameRef.current = requestAnimationFrame(runIsingSimulation);
+        
+        // Cleanup
+        return () => {
+          console.log("Stopping Ising simulation loop");
+          if (animationFrameRef.current) {
+            cancelAnimationFrame(animationFrameRef.current);
+            animationFrameRef.current = null;
+          }
+        };
+      }, [isRealTimeSimulating, simulationTemp, timeScale]);
+      
+      // MODIFIED: Reset spins to random configuration - now works during simulation
+      const resetSpins = () => {
+        if (!isingModelRef.current) return;
+        
+        // Randomize spins without stopping simulation
+        isingModelRef.current.state = Array(isingModelRef.current.numNodes).fill().map(() => Math.random() < 0.5 ? 1 : -1);
+        isingModelRef.current.energy = isingModelRef.current.calculateTotalEnergy();
+        
+        // Update state
+        setSpins([...isingModelRef.current.state]);
+        setMagnetization(isingModelRef.current.calculateMagnetization());
+        setAbsoluteMagnetization(isingModelRef.current.calculateAbsoluteMagnetization());
+        setEnergy(isingModelRef.current.energy);
+      };
+      
+      // MODIFIED: Set all spins to the same value - now works during simulation
+      const setAllSpins = (value) => {
+        if (!isingModelRef.current) return;
+        
+        // Set all spins to value without stopping simulation
+        isingModelRef.current.state = Array(isingModelRef.current.numNodes).fill(value);
+        isingModelRef.current.energy = isingModelRef.current.calculateTotalEnergy();
+        
+        // Update state
+        setSpins([...isingModelRef.current.state]);
+        setMagnetization(isingModelRef.current.calculateMagnetization());
+        setAbsoluteMagnetization(isingModelRef.current.calculateAbsoluteMagnetization());
+        setEnergy(isingModelRef.current.energy);
+      };
+      
+      // Determine phase based on temperature relative to critical point
+      const getPhaseDescription = () => {
+        if (!criticalTemp) return "Unknown";
+        
+        if (simulationTemp < criticalTemp * 0.8) {
+          return "Ordered (Ferromagnetic)";
+        } else if (simulationTemp > criticalTemp * 1.2) {
+          return "Disordered (Paramagnetic)";
+        } else {
+          return "Near Critical Point";
+        }
+      };
+      
+      // Load example graph types
+      const loadExampleGraph = (type) => {
+        let matrix = null;
+        
+        switch (type) {
+          case 'grid': {
+            // Create a 5x5 square grid
+            const size = 5;
+            matrix = Array(size * size).fill().map(() => Array(size * size).fill(0));
+            
+            for (let i = 0; i < size; i++) {
+              for (let j = 0; j < size; j++) {
+                const index = i * size + j;
+                
+                // Connect to right neighbor
+                if (j < size - 1) {
+                  matrix[index][index + 1] = 1;
+                  matrix[index + 1][index] = 1;
+                }
+                
+                // Connect to bottom neighbor
+                if (i < size - 1) {
+                  matrix[index][index + size] = 1;
+                  matrix[index + size][index] = 1;
+                }
+              }
+            }
+            
+            // Set known critical temperature
+            setCriticalTemp(KNOWN_CRITICAL_TEMPS.grid);
+            break;
+          }
+          case 'triangular': {
+            // Create a triangular lattice
+            const size = 5;
+            matrix = Array(size * size).fill().map(() => Array(size * size).fill(0));
+            
+            for (let i = 0; i < size; i++) {
+              for (let j = 0; j < size; j++) {
+                const index = i * size + j;
+                
+                // Connect to right neighbor
+                if (j < size - 1) {
+                  matrix[index][index + 1] = 1;
+                  matrix[index + 1][index] = 1;
+                }
+                
+                // Connect to bottom neighbor
+                if (i < size - 1) {
+                  matrix[index][index + size] = 1;
+                  matrix[index + size][index] = 1;
+                }
+                
+                // Connect diagonally
+                if (i < size - 1 && j < size - 1) {
+                  matrix[index][index + size + 1] = 1;
+                  matrix[index + size + 1][index] = 1;
+                }
+              }
+            }
+            
+            // Set known critical temperature
+            setCriticalTemp(KNOWN_CRITICAL_TEMPS.triangular);
+            break;
+          }
+          case 'hexagonal': {
+            // Create a hexagonal lattice approximation
+            const size = 4;
+            const totalNodes = size * size * 2; // Two nodes per unit cell
+            matrix = Array(totalNodes).fill().map(() => Array(totalNodes).fill(0));
+            
+            for (let i = 0; i < size; i++) {
+              for (let j = 0; j < size; j++) {
+                const node1 = (i * size + j) * 2;
+                const node2 = node1 + 1;
+                
+                // Connect nodes within the unit cell
+                matrix[node1][node2] = 1;
+                matrix[node2][node1] = 1;
+                
+                // Connect to the right unit cell
+                if (j < size - 1) {
+                  matrix[node2][(i * size + j + 1) * 2] = 1;
+                  matrix[(i * size + j + 1) * 2][node2] = 1;
+                }
+                
+                // Connect to the bottom unit cell
+                if (i < size - 1) {
+                  matrix[node1][((i + 1) * size + j) * 2 + 1] = 1;
+                  matrix[((i + 1) * size + j) * 2 + 1][node1] = 1;
+                }
+              }
+            }
+            
+            // Set known critical temperature
+            setCriticalTemp(KNOWN_CRITICAL_TEMPS.hexagonal);
+            break;
+          }
+          default:
+            return;
+        }
+        
+        // Initialize with the matrix
+        setAdjacencyMatrix(matrix);
+        setIsGraphLoaded(true);
+        setShowSimulationView(false); // Make sure we're showing the interactive view
+        
+        // Calculate graph statistics
+        const n = matrix.length;
+        let edges = 0;
+        for (let i = 0; i < n; i++) {
+          for (let j = i + 1; j < n; j++) {
+            if (matrix[i][j] !== 0) edges++;
+          }
+        }
+        setGraphStats({ nodes: n, edges });
+        
+        // Initialize Ising model
+        initializeIsingModel();
+        
+        // Reset calculation results
+        setMagnetizationData([]);
+      };
+
+      // Load default graph on initial render
+      useEffect(() => {
+        if (!isGraphLoaded) {
+          loadExampleGraph('grid');
+        }
+      }, []);
+      
+      // Render method combining the JSX from your component
+      return (
+        <div className="flex flex-col w-full bg-white p-4 rounded-lg">
+          <div className="text-xl font-bold mb-4 text-center">Ising Model on Arbitrary Graphs</div>
+          
+          <div className="flex flex-col md:flex-row gap-4 mb-4">
+            {/* Lattice selection */}
+            <div className="bg-gray-100 p-3 rounded-lg w-full">
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex-1">
+                  <h3 className="font-bold mb-2">Select Lattice Type</h3>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => loadExampleGraph('grid')}
+                      className="p-2 border rounded bg-blue-500 text-white hover:bg-blue-600 flex-1"
+                      disabled={isCalculating}
+                    >
+                      Square Grid
+                    </button>
+                    <button
+                      onClick={() => loadExampleGraph('triangular')}
+                      className="p-2 border rounded bg-blue-500 text-white hover:bg-blue-600 flex-1"
+                      disabled={isCalculating}
+                    >
+                      Triangular
+                    </button>
+                    <button
+                      onClick={() => loadExampleGraph('hexagonal')}
+                      className="p-2 border rounded bg-blue-500 text-white hover:bg-blue-600 flex-1"
+                      disabled={isCalculating}
+                    >
+                      Hexagonal
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Graph preview and stats with dual view */}
+          {isGraphLoaded && (
+            <div className="bg-gray-100 p-3 rounded-lg mb-4">
+              <div className="flex flex-col gap-4">
+                <div className="w-full bg-white rounded shadow-md">
+                  {!showSimulationView ? (
+                    <GraphPreview 
+                      adjacencyMatrix={adjacencyMatrix}
+                      spins={spins}
+                      onSvgRef={handleSvgRef}
+                    />
+                  ) : (
+                    <StaticIsingView 
+                      adjacencyMatrix={adjacencyMatrix}
+                      spins={spins}
+                      positions={nodePositions}
+                    />
+                  )}
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-2 bg-white rounded">
+                  <div><span className="font-semibold">Nodes:</span> {graphStats.nodes}</div>
+                  <div><span className="font-semibold">Edges:</span> {graphStats.edges}</div>
+                  <div><span className="font-semibold">Average Degree:</span> {(2 * graphStats.edges / graphStats.nodes).toFixed(2)}</div>
+                  <div><span className="font-semibold">Connectivity:</span> {(graphStats.edges / (graphStats.nodes * (graphStats.nodes - 1) / 2) * 100).toFixed(2)}%</div>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Real-time Ising model controls */}
+          {isGraphLoaded && (
+            <div className="bg-gray-100 p-3 rounded-lg mb-4">
+              <h3 className="font-bold mb-2">Real-time Ising Model Simulation</h3>
+              
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex-1">
+                  <h4 className="font-semibold mb-1">Temperature Control</h4>
+                  <div className="flex items-center gap-2">
+                    <input 
+                      type="range" 
+                      min="0.5" 
+                      max="5.0" 
+                      step="0.1" 
+                      value={simulationTemp}
+                      onChange={handleSimulationTempChange}
+                      className="w-full"
+                      disabled={isCalculating}
+                    />
+                    <span className="font-bold text-lg w-16 text-right">{simulationTemp.toFixed(1)}</span>
+                  </div>
+                  <div className="text-xs text-gray-600 flex justify-between mt-1">
+                    <span>Cold (Ordered)</span>
+                    <span>Hot (Disordered)</span>
+                  </div>
+                  
+                  <div className="mt-4">
+                    <h4 className="font-semibold mb-1">Time Scale</h4>
+                    <div className="flex items-center gap-2">
+                      <input 
+                        type="range" 
+                        min="50" 
+                        max="500" 
+                        step="10" 
+                        value={timeScale}
+                        onChange={handleTimeScaleChange}
+                        className="w-full"
+                        disabled={isCalculating}
+                      />
+                      <span className="font-bold text-lg w-16 text-right">{timeScale}</span>
+                    </div>
+                    <div className="text-xs text-gray-600 flex justify-between mt-1">
+                      <span>Slower</span>
+                      <span>Faster</span>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-3">
+                    <div className="text-sm">
+                      <span className="font-semibold">Critical Temperature:</span> {criticalTemp ? criticalTemp.toFixed(2) : "Estimating..."}
+                    </div>
+                    <div className="text-sm">
+                      <span className="font-semibold">Current Phase:</span> {getPhaseDescription()}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex-1">
+                  <h4 className="font-semibold mb-2">Simulation Statistics</h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="text-sm"><span className="font-semibold">Magnetization:</span> {magnetization.toFixed(3)}</div>
+                    <div className="text-sm"><span className="font-semibold">|Magnetization|:</span> {absoluteMagnetization.toFixed(3)}</div>
+                    <div className="text-sm"><span className="font-semibold">Energy:</span> {energy.toFixed(3)}</div>
+                    <div className="text-sm"><span className="font-semibold">Energy per Site:</span> {(energy / (graphStats.nodes || 1)).toFixed(3)}</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex flex-wrap gap-2 mt-4 justify-center">
+                <button
+                  onClick={toggleRealTimeSimulation}
+                  className={`px-4 py-2 font-bold text-white rounded ${isRealTimeSimulating ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}`}
+                  disabled={isCalculating}
+                >
+                  {isRealTimeSimulating ? 'Stop Simulation' : 'Simulate Magnet'}
+                </button>
+                
+                <button
+                  onClick={resetSpins}
+                  className="px-4 py-2 font-bold bg-yellow-500 text-white rounded hover:bg-yellow-600"
+                  disabled={isCalculating}
+                >
+                  Randomize Spins
+                </button>
+                
+                <button
+                  onClick={() => setAllSpins(1)}
+                  className="px-4 py-2 font-bold bg-black text-white rounded hover:bg-gray-800"
+                  disabled={isCalculating}
+                >
+                  All Up (Black)
+                </button>
+                
+                <button
+                  onClick={() => setAllSpins(-1)}
+                  className="px-4 py-2 font-bold bg-white text-black border-2 border-black rounded hover:bg-gray-100"
+                  disabled={isCalculating}
+                >
+                  All Down (White)
+                </button>
+              </div>
+            </div>
+          )}
+          
+          {/* Information */}
+          <div className="text-sm text-gray-600 bg-gray-100 p-3 rounded-lg">
+            <h3 className="font-bold mb-2">About the Ising Model</h3>
+            <p>
+              This tool combines interactive real-time simulation with quantitative magnetization curve calculation
+              for the Ising model on arbitrary graph structures. The Ising model is a mathematical model of 
+              ferromagnetism in statistical mechanics.
+            </p>
+            <p className="mt-2">
+              <strong>Controls:</strong>
+            </p>
+            <ul className="list-disc pl-5 mt-1">
+              <li><strong>Simulate Magnet</strong> - Run real-time Monte Carlo simulation at current temperature</li>
+              <li><strong>Time Scale</strong> - Control simulation speed (50-500 Monte Carlo steps per frame)</li>
+              <li><strong>Critical temperature values:</strong> Square lattice Tc ≈ 2.27, Triangular lattice Tc ≈ 3.64, Hexagonal lattice Tc ≈ 1.52</li>
+            </ul>
+          </div>
+        </div>
+      );
+    }
+
+    // Render the main component
+    ReactDOM.createRoot(document.getElementById('root')).render(<MagnetizationCalculator />);
+  </script>
+</body>
+</html>
