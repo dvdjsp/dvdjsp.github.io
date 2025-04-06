@@ -35,11 +35,7 @@
   
   <!-- Your Ising Model code as a script with type="text/babel" -->
   <script type="text/babel">
-    // Paste your entire Working_Ising.jsx code here, unmodified
-    
-    // At the very end, add this line to render:
-    ReactDOM.createRoot(document.getElementById('root')).render(<MagnetizationCalculator />);
-  import React, { useState, useEffect, useRef } from 'react';
+    import React, { useState, useEffect, useRef } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine, Label, ResponsiveContainer } from 'recharts';
 import * as d3 from 'd3';
 // COMPREHENSIVE FIX FOR ISING MODEL
@@ -173,41 +169,28 @@ class IsingModel {
     return energy;
   }
   
+  // FIXED: Run simulation steps using Metropolis algorithm with proper scaling
   simulationSteps(temperature, nSteps) {
-    // For very high temperatures, increase chance of flips across the entire lattice
-    const flipBias = temperature > 4.0 ? 0.1 : 0;
+    // Scale nSteps to ensure each site has a chance to be updated
+    // We want on average nSteps update attempts per site
+    const totalAttempts = nSteps * this.numNodes;
     
-    let flipCount = 0;
-    const initialState = [...this.state]; // For debugging
-    
-    for (let step = 0; step < nSteps; step++) {
-      // Select a random site with a tweak to improve coverage
-      let site;
-      
-      // Every N steps, try to systematically go through under-represented regions
-      if (step % 20 === 0) {
-        // Find regions with little activity by comparing consecutive sites
-        const regionStart = Math.floor(Math.random() * (this.numNodes - 10));
-        site = regionStart + (step % 10); // Select sequentially within a random region
-      } else {
-        // Normal random selection
-        site = Math.floor(Math.random() * this.numNodes);
-      }
+    for (let attempt = 0; attempt < totalAttempts; attempt++) {
+      // Select a random site
+      const site = Math.floor(Math.random() * this.numNodes);
       
       // Calculate energy change if we flip the spin
       const deltaE = this.calculateDeltaEnergy(site);
       
-      // For high temperatures, occasionally force a flip to ensure activity everywhere
-      const shouldFlip = deltaE <= 0 || 
-                         Math.random() < Math.exp(-deltaE / temperature) ||
-                         (temperature > 3.0 && Math.random() < flipBias);
-      
-      if (shouldFlip) {
+      // Accept or reject the flip based on Metropolis criterion
+      if (deltaE <= 0 || Math.random() < Math.exp(-deltaE / temperature)) {
         this.state[site] *= -1;
         this.energy += deltaE;
-        flipCount++;
       }
     }
+    
+    return [...this.state];
+  }
   
   // Calculate magnetization (average spin)
   calculateMagnetization() {
@@ -2306,5 +2289,7 @@ function MagnetizationCalculator() {
 }
 
 export default MagnetizationCalculator;
+    ReactDOM.createRoot(document.getElementById('root')).render(<MagnetizationCalculator />);
+  </script>
 </body>
 </html>
