@@ -1,5 +1,6 @@
 ---
 layout: page
+permalink: /ising/
 title: Interactive Ising Model Simulator
 description: Real-time simulation of phase transitions in magnetic materials
 img: assets/img/projects/ising-preview.png
