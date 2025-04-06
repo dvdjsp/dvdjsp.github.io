@@ -1,22 +1,20 @@
 ---
 layout: default
 ---
-
 <div class="post">
   <header class="post-header">
     <h1 class="post-title">{{ page.title }}</h1>
   </header>
 
   <article>
-    <!-- Add visible border to see the element -->
-    <div id="react-root" style="border: 1px solid #ccc; min-height: 200px; padding: 20px; margin: 20px 0;"></div>
+    <div id="react-root" style="border: 1px solid #ccc; min-height: 200px; padding: 20px; margin-bottom: 20px;"></div>
     {{ content }}
   </article>
 
-  <!-- React libraries -->
+  <!-- Load React libraries -->
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   
-  <!-- Your component -->
-  <script src="{{ page.js_script | relative_url }}"></script>
+  <!-- The critical part: Use liquid templating exactly as in _includes/scripts.liquid -->
+  <script src="{{ '/assets/js/test-component-compiled.js' | relative_url }}"></script>
 </div>
