@@ -2,16 +2,26 @@
 layout: default
 ---
 
-<div>
-  <h1>{{ page.title }}</h1>
-  <div id="react-root"></div>
-  {{ content }}
+<div class="post">
+  <header class="post-header">
+    <h1 class="post-title">{{ page.title }}</h1>
+    <p class="post-description">{{ page.description }}</p>
+  </header>
+
+  <article>
+    <div id="react-root"></div>
+    {{ content }}
+  </article>
+
+  <!-- Load React -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+  
+  <!-- Load required libraries for your component -->
+  <script src="https://unpkg.com/d3@7/dist/d3.min.js"></script>
+  <script src="https://unpkg.com/recharts@2/dist/recharts.min.js"></script>
+  
+  <!-- Load your JSX -->
+  <script type="text/babel" src="{{ page.jsx_script | relative_url }}"></script>
 </div>
-
-<!-- Load React directly from CDN -->
-<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
-
-<!-- Load your JSX -->
-<script type="text/babel" src="{{ page.jsx_script | relative_url }}"></script>
