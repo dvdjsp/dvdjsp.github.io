@@ -8,10 +8,7 @@ permalink: /ising-model/
   The Ising model simulation is loading...
 </div>
 
-<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://d3js.org/d3.v7.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/recharts@2.7.2/umd/Recharts.min.js"></script>
-<script src="{{ '/assets/js/ising.js' | relative_url }}"></script>
+<link rel="stylesheet" href="{{ '/assets/css/main.0b108429.css' | relative_url }}">
 
+<script src="{{ '/assets/js/main.f941aff2.js' | relative_url }}" defer></script>
 This page demonstrates an interactive Ising Model simulation. The Ising model is a mathematical model of ferromagnetism in statistical mechanics, consisting of discrete variables that represent magnetic dipole moments of atomic spins.
