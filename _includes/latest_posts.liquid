@@ -46,3 +46,18 @@
     <p>No posts so far...</p>
   {% endif %}
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    if (typeof MathJax !== 'undefined') {
+      MathJax.typesetPromise().catch((err) => console.log(err));
+    } else {
+      // Wait for MathJax to load
+      window.addEventListener('load', function() {
+        if (typeof MathJax !== 'undefined') {
+          MathJax.typesetPromise().catch((err) => console.log(err));
+        }
+      });
+    }
+  });
+</script>

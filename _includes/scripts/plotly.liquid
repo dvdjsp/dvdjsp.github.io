@@ -1,0 +1,133 @@
+{% if page.chart and page.chart.plotly %}
+  <script
+    src="https://cdn.plot.ly/plotly-2.35.2.min.js"
+    charset="utf-8"
+  ></script>
+  <script>
+    let plotlyTheme = determineComputedTheme();
+    let plotlyCharts = [];
+
+    // Box-Muller transform for generating normally distributed random numbers
+    function randn(mean = 0, stdDev = 1) {
+      let u1 = Math.random();
+      let u2 = Math.random();
+      let z0 = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+      return z0 * stdDev + mean;
+    }
+
+    function generateFunctionData(trace) {
+      if (!trace.function) return trace;
+      
+      const xmin = trace.xmin || 0;
+      const xmax = trace.xmax || 10;
+      const points = trace.points || 100;
+      const step = (xmax - xmin) / (points - 1);
+      
+      const x = [];
+      const y = [];
+      
+      for (let i = 0; i < points; i++) {
+        const xVal = xmin + i * step;
+        x.push(xVal);
+        try {
+          // Create a function from the string and evaluate it
+          // Make randn available in the function scope
+          const func = new Function('x', 'Math', 'randn', `with(Math) { return ${trace.function}; }`);
+          y.push(func(xVal, Math, randn));
+        } catch (e) {
+          console.error('Error evaluating function:', trace.function, e);
+          y.push(null);
+        }
+      }
+      
+      // Copy trace properties but replace with generated data
+      const newTrace = { ...trace, x, y };
+      delete newTrace.function;
+      delete newTrace.xmin;
+      delete newTrace.xmax;
+      delete newTrace.points;
+      
+      return newTrace;
+    }
+
+    function applyPlotlyTheme(chartElement, jsonData, theme) {
+      const data = JSON.parse(jsonData);
+      const layout = data.layout || {};
+      const config = data.config || { responsive: true };
+      
+      // Process each trace - generate function data if needed
+      const processedData = data.data.map(trace => generateFunctionData(trace));
+      
+      /* Apply theme styling */
+      if (theme === 'dark') {
+        layout.paper_bgcolor = '#1a1a1a';
+        layout.plot_bgcolor = '#1a1a1a';
+        layout.font = layout.font || {};
+        layout.font.color = '#e0e0e0';
+        layout.xaxis = layout.xaxis || {};
+        layout.xaxis.gridcolor = '#444';
+        layout.yaxis = layout.yaxis || {};
+        layout.yaxis.gridcolor = '#444';
+      } else {
+        layout.paper_bgcolor = '#ffffff';
+        layout.plot_bgcolor = '#ffffff';
+        layout.font = layout.font || {};
+        layout.font.color = '#333';
+        layout.xaxis = layout.xaxis || {};
+        layout.xaxis.gridcolor = '#e5e5e5';
+        layout.yaxis = layout.yaxis || {};
+        layout.yaxis.gridcolor = '#e5e5e5';
+      }
+
+      Plotly.newPlot(chartElement, processedData, layout, config);
+    }
+
+    /* Create plotly chart as another node and hide the code block, appending the plotly node after it
+       this is done to enable retrieving the code again when changing theme between light/dark */
+    document.addEventListener('readystatechange', () => {
+      if (document.readyState === 'complete') {
+        document.querySelectorAll('pre>code.language-plotly').forEach((elem) => {
+          const jsonData = elem.textContent;
+          const backup = elem.parentElement;
+          backup.classList.add('unloaded');
+          /* create plotly node */
+          let chartElement = document.createElement('div');
+          chartElement.classList.add('plotly');
+          backup.after(chartElement);
+
+          /* Store chart data for theme updates */
+          plotlyCharts.push({ element: chartElement, data: jsonData });
+
+          /* create plotly chart */
+          applyPlotlyTheme(chartElement, jsonData, plotlyTheme);
+          
+          window.addEventListener('resize', function () {
+            Plotly.Plots.resize(chartElement);
+          });
+        });
+      }
+    });
+
+    /* Listen for theme changes and update all plotly charts */
+    if (typeof MutationObserver !== 'undefined') {
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+            const newTheme = determineComputedTheme();
+            if (newTheme !== plotlyTheme) {
+              plotlyTheme = newTheme;
+              plotlyCharts.forEach((chart) => {
+                applyPlotlyTheme(chart.element, chart.data, plotlyTheme);
+              });
+            }
+          }
+        });
+      });
+
+      observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-theme']
+      });
+    }
+  </script>
+{% endif %}
