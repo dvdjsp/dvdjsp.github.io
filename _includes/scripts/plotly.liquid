@@ -15,6 +15,24 @@
       return z0 * stdDev + mean;
     }
 
+    // Perform least squares linear fit on data
+    function leastSquaresFit(xData, yData) {
+      const n = xData.length;
+      let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+      
+      for (let i = 0; i < n; i++) {
+        sumX += xData[i];
+        sumY += yData[i];
+        sumXY += xData[i] * yData[i];
+        sumXX += xData[i] * xData[i];
+      }
+      
+      const m = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+      const c = (sumY - m * sumX) / n;
+      
+      return { m, c };
+    }
+
     function generateFunctionData(trace) {
       if (!trace.function) return trace;
       
@@ -57,6 +75,41 @@
       
       // Process each trace - generate function data if needed
       const processedData = data.data.map(trace => generateFunctionData(trace));
+      
+      // Check if we need to compute least squares fit
+      // Look for a trace with fitFromTrace property
+      processedData.forEach((trace, idx) => {
+        if (trace.fitFromTrace !== undefined) {
+          const sourceTrace = processedData[trace.fitFromTrace];
+          if (sourceTrace && sourceTrace.x && sourceTrace.y) {
+            const fit = leastSquaresFit(sourceTrace.x, sourceTrace.y);
+            
+            // Generate fitted line data
+            const xmin = Math.min(...sourceTrace.x);
+            const xmax = Math.max(...sourceTrace.x);
+            const points = trace.points || 100;
+            const step = (xmax - xmin) / (points - 1);
+            
+            const x = [];
+            const y = [];
+            for (let i = 0; i < points; i++) {
+              const xVal = xmin + i * step;
+              x.push(xVal);
+              y.push(fit.m * xVal + fit.c);
+            }
+            
+            trace.x = x;
+            trace.y = y;
+            
+            // Update the trace name with fitted parameters
+            if (trace.name && trace.name.includes('Fit')) {
+              trace.name = `Least Squares Fit m=${fit.m.toFixed(2)}, c=${fit.c.toFixed(2)}`;
+            }
+            
+            delete trace.fitFromTrace;
+          }
+        }
+      });
       
       /* Apply theme styling */
       if (theme === 'dark') {
