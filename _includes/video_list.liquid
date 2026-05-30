@@ -1,0 +1,41 @@
+{% assign videos = site.static_files | where:"path", "assets/video/*.mp4" | where:"path", "ends_with:'.mp4' or ends_with:'.webm' or ends_with:'.mov'" | sort:"name" %}
+
+{% if videos.size > 0 %}
+{% for video in videos %}
+  <div class="list-group-item">
+    <div class="row">
+      <div class="col-xs-2 cl-sm-2 col-md-2 text-center date-column">
+        {% assign date = video.path | split: '/' | last | split: '.' | first | split: '-' %}
+        {% if date.size >= 3 %}
+          {% assign m = date[0] %}
+          {% assign d = date[1] %}
+          {% assign y = date[2..-1] %}
+          {% assign formattedDate = m | prepend: '.' | prepend: '.' | append: y %}
+        {% else %}
+          {% assign formattedDate = 'No Date' %}
+        {% endif %}
+        <table class="table-cv">
+          <tbody>
+            <tr>
+              <td>
+                <span class="badge font-weight-bold danger-color-dark text-uppercase align-middle" style="min-width: 75px">{{ formattedDate }}</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="col-xs-10 cl-sm-10 col-md-10 mt-2 mt-md-0">
+        <h6 class="title font-weight-bold ml-1 ml-md-4">
+          {% assign fileName = video.path | split: '/' | last %}
+          <a href="{{ video.url }}">{{ fileName }}</a>
+        </h6>
+        <h6 class="ml-1 ml-md-4" style="font-size: 0.95rem">Video</h6>
+      </div>
+    </div>
+  </div>
+{% endfor %}
+{% else %}
+<div class="list-group-item text-center">
+  No videos found.
+</div>
+{% endif %}
