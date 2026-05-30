@@ -2,12 +2,12 @@
 layout: page
 permalink: /music/
 title: Music
-description: When I'm not usually trying to solve for eigenvalues as a physicist, I try to come up with cool basslines as a bassist.
+description: 
 nav: true
 nav_order: 6
 ---
- I'm a member of the [New Standards Music collective](https://www.instagram.com/new.standards.music/?hl=en) in Edmonton. I frequent the open jam sessions they host every Wednesday.
- 
-Here are some snippets of all the music fun I've had there and elsewhere:
+ I'm a member of the [New Standards Music collective](https://www.instagram.com/new.standards.music/?hl=en) in Edmonton. I frequent their open jam sessions every Wednesday. Here are some snippets of all the music fun I've had there and elsewhere:
 
-{% include video.liquid path="assets/video/Vid1.mp4" class="img-fluid rounded z-depth-1" controls=true autoplay=false %}
+<!-- {% include video.liquid path="assets/video/Vid1.mp4" class="img-fluid rounded z-depth-1" controls=true autoplay=false %} -->
+
+{% include video_grid %}
