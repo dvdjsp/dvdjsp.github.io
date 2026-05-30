@@ -1,0 +1,35 @@
+{% assign videos = site.static_files | where:"path", "assets/video/*.mp4" | where:"path", "ends_with:'.mp4' or ends_with:'.webm' or ends_with:'.mov'" | sort:"name" %}
+
+{% if videos.size > 0 %}
+<div class="row">
+  {% for video in videos %}
+    <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 mb-4">
+      <div class="card h-100">
+        <div class="card-header" style="background: {{ site.data.theme.colors.secondary }}; color: white; text-align: center;">
+          <small class="text-uppercase">Video</small>
+        </div>
+        <div class="card-body text-center">
+          {% assign fileName = video.path | split: '/' | last %}
+          {% assign fileNameNoExt = fileName | split: '.' | first %}
+          {% assign dateStr = fileNameNoExt | split: '-' | last %}
+          
+          <span class="badge font-weight-bold danger-color-dark text-uppercase mb-2" style="min-width: 75px; display: inline-block;">
+            {{ dateStr }}
+          </span>
+          
+          <h6 class="card-title font-weight-bold" style="font-size: 0.9rem; margin-top: 10px;">
+            <a href="{{ video.url }}" style="color: {{ site.data.theme.colors.primary }};">{{ fileName }}</a>
+          </h6>
+          <p class="card-text text-muted font-weight-light" style="font-size: 0.85rem;">
+            Video snippet
+          </p>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="text-center text-muted">
+  No videos found yet.
+</div>
+{% endif %}
