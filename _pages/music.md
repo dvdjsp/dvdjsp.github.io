@@ -9,3 +9,4 @@ nav_order: 6
  I'm a member of the [New Standards Music collective](https://www.instagram.com/new.standards.music/?hl=en) in Edmonton. I frequent the open jam sessions they host every Wednesday.
  
 Here are some snippets of all the fun I've had:
+{% include video.liquid path="assets/video/Vid1.MOV" class="img-fluid rounded z-depth-1" controls=true autoplay=true %}
