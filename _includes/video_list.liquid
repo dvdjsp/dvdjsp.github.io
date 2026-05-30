@@ -1,3 +1,4 @@
+
 {% assign videos = site.static_files | where:"path", "assets/video/*.mp4" | where:"path", "ends_with:'.mp4' or ends_with:'.webm' or ends_with:'.mov'" | sort:"name" %}
 
 {% if videos.size > 0 %}
