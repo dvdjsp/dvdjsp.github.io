@@ -40,3 +40,10 @@
     <p>{{ file.path }}</p>
   {% endif %}
 {% endfor %}
+
+{% assign all = site.static_files | where:"path", "contains:'assets/video/'" | where:"path", "ends_with:'.mp4'" | sort:"name" %}
+{% if all.size > 0 %}
+  <pre>{{ all | json }}</pre>
+{% else %}
+  <p>No matching files found!</p>
+{% endif %}
