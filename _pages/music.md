@@ -11,3 +11,5 @@ I'm a member of the [New Standards Music collective](https://www.instagram.com/n
 {% include video.liquid path="assets/video/2025-06-05.mp4" class="img-fluid rounded z-depth-1" controls=true autoplay=false %}
 
 {% include video.liquid path="assets/video/2025-06-06.mp4" class="img-fluid rounded z-depth-1" controls=true autoplay=false %}
+
+{% include video-grid.liquid %}c
