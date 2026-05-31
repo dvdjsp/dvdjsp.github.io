@@ -18,7 +18,7 @@
           </span>
           
           <h6 class="card-title font-weight-bold" style="font-size: 0.9rem; margin-top: 10px;">
-            <a href="{{ video.url }}" style="color: {{ site.data.theme.colors.primary }};">{{ fileName }}</a>
+            <a href="{{ include.path | relative_url | bust_file_cache }}" style="color: {{ site.data.theme.colors.primary }};">{{ fileName }}</a>
           </h6>
           <p class="card-text text-muted font-weight-light" style="font-size: 0.85rem;">
             Video snippet
