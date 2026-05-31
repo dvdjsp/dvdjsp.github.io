@@ -1,49 +1,36 @@
 {% assign videos = site.static_files | where:"path", "contains:'assets/video/'" | where:"path", "ends_with:'.mp4'" | sort:"name" %}
 
 {% if videos.size > 0 %}
-<div class="row">
-  {% for video in videos %}
-    <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 mb-4">
-      <div class="card h-100">
-        <div class="card-header" style="background: {{ site.data.theme.colors.secondary }}; color: white; text-align: center;">
-          <small class="text-uppercase">Video</small>
-        </div>
-        <div class="card-body text-center">
-          {% assign fileName = video.path | split: '/' | last %}
-          {% assign fileNameNoExt = fileName | split: '.' | first %}
-          {% assign dateStr = fileNameNoExt | split: '-' | last %}
-          
-          <span class="badge font-weight-bold danger-color-dark text-uppercase mb-2" style="min-width: 75px; display: inline-block;">
-            {{ dateStr }}
-          </span>
-          
-          <h6 class="card-title font-weight-bold" style="font-size: 0.9rem; margin-top: 10px;">
-            <a href="{{ include.path | relative_url | bust_file_cache }}" style="color: {{ site.data.theme.colors.primary }};">{{ fileName }}</a>
-          </h6>
-          <p class="card-text text-muted font-weight-light" style="font-size: 0.85rem;">
-            Video snippet
-          </p>
+  <div class="row">
+    {% for video in videos %}
+      <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 mb-4">
+        <div class="card h-100">
+          <div class="card-header" style="background: {{ site.data.theme.colors.secondary }}; color: white; text-align: center;">
+            <small class="text-uppercase">Video</small>
+          </div>
+          <div class="card-body text-center">
+            <div class="card-text">
+              <span class="badge font-weight-bold danger-color-dark text-uppercase mb-2" style="min-width: 75px; display: inline-block;">
+                {{ fileNameNoExt | dateStr | first }}
+              </span>
+              
+              <h6 class="card-title font-weight-bold" style="font-size: 0.9rem;">
+                <a href="{{ include.path | relative_url | bust_file_cache }}"
+                   style="color: {{ site.data.theme.colors.primary }};">
+                  {{ fileName }}
+                </a>
+              </h6>
+              <p class="card-text text-muted font-weight-light" style="font-size: 0.85rem;">
+                Video snippet
+              </p>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  {% endfor %}
-</div>
+    {% endfor %}
+  </div>
 {% else %}
-<div class="text-center text-muted">
-  No videos found yet.
-</div>
-{% endif %}
-
-{% assign all = site.static_files | where:"path", "contains:'assets/video/'" | sort:"name" %}
-{% for file in all %}
-  {% if file.path contains 'video' %}
-    <p>{{ file.path }}</p>
-  {% endif %}
-{% endfor %}
-
-{% assign all = site.static_files | where:"path", "contains:'assets/video/'" | where:"path", "ends_with:'.mp4'" | sort:"name" %}
-{% if all.size > 0 %}
-  <pre>{{ all | json }}</pre>
-{% else %}
-  <p>No matching files found!</p>
+  <div class="text-center text-muted">
+    No videos found yet.
+  </div>
 {% endif %}
