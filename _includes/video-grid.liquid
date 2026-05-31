@@ -1,4 +1,4 @@
-{% assign videos = site.static_files | where:"path", "match_regexp:.mp4$" | where:"path", "match_regexp:assets/video" | sort:"name" %}
+{% assign videos = site.static_files | where:"path", "match_regexp:assets/video.*\.mp4$" | sort:"name" %}
 
 {% if videos.size > 0 %}
 <div class="row">
