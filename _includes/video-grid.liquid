@@ -1,4 +1,4 @@
-{% assign videos = site.static_files | where:"path", "contains:'assets/video'" | where:"path", "ends_with:'.mp4'" | sort:"name" %}
+{% assign videos = site.static_files | where:"path", "contains:'assets/video/'" | where:"path", "ends_with:'.mp4'" | sort:"name" %}
 
 {% if videos.size > 0 %}
 <div class="row">
@@ -33,3 +33,10 @@
   No videos found yet.
 </div>
 {% endif %}
+
+{% assign all = site.static_files | where:"path", "contains:'assets/video/'" | sort:"name" %}
+{% for file in all %}
+  {% if file.path contains 'video' %}
+    <p>{{ file.path }}</p>
+  {% endif %}
+{% endfor %}
