@@ -1,4 +1,4 @@
-{% assign videos = site.static_files | where:"path", "path contains '/assets/video/'" | where:"path", "path ends_with '.mp4'" | sort:"name" %}
+{% assign videos = site.static_files | where_exp: "video", "video.path contains '/assets/video/' and video.path contains '.mp4'" | sort: "path" %}
 
 {% if videos.size > 0 %}
   <div class="row">
