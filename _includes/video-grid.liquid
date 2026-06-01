@@ -1,35 +1,77 @@
-{% assign videos = site.static_files | where_exp: "video", "video.path contains '/assets/video/' and video.path contains '.mp4'" | sort: "path" %}
+{% assign videos = site.static_files | where_exp: "video", "video.path contains '/assets/video/' and video.path contains '.mp4'" | sort: "path" | reverse %}
 
 {% if videos.size > 0 %}
-  <div class="row">
-    {% for video in videos %}
-      {% assign fileName = video.name | remove: ".mp4" %}
-      <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 mb-4">
-        <div class="card h-100">
-          <div class="card-header" style="background: {{ site.data.theme.colors.secondary }}; color: white; text-align: center;">
-            <small class="text-uppercase">Video</small>
-          </div>
-          <div class="card-body text-center">
-            <div class="card-text">
-              <span class="badge font-weight-bold danger-color-dark text-uppercase mb-2" style="min-width: 75px; display: inline-block;">
-                {{ fileName }}
-              </span>
-              
-              <h6 class="card-title font-weight-bold" style="font-size: 0.9rem;">
-                <a href="{{ video.path | relative_url | bust_file_cache }}"
-                   style="color: {{ site.data.theme.colors.primary }};">
-                  {{ fileName }}
-                </a>
-              </h6>
-              <p class="card-text text-muted font-weight-light" style="font-size: 0.85rem;">
-                Video snippet
-              </p>
-            </div>
-          </div>
+  {% assign grouped_videos = site.emptyArray %}
+  
+  {% for video in videos %}
+    {% assign fileName = video.name | remove: ".mp4" %}
+    {% assign dateParts = fileName | split: '-' %}
+    
+    {% if dateParts.size >= 3 %}
+      {% assign year = dateParts[0] %}
+    {% else %}
+      {% assign year = "Other" %}
+    {% endif %}
+    
+    {% assign video_with_year = video | map: add_key, year %}
+  {% endfor %}
+  
+  {% assign currentYear = "" %}
+  
+  {% for video in videos %}
+    {% assign fileName = video.name | remove: ".mp4" %}
+    {% assign dateParts = fileName | split: '-' %}
+    
+    {% if dateParts.size >= 3 %}
+      {% assign year = dateParts[0] %}
+      {% assign month = dateParts[1] %}
+      {% assign day = dateParts[2] %}
+    {% else %}
+      {% assign year = "Other" %}
+      {% assign month = "00" %}
+      {% assign day = "00" %}
+    {% endif %}
+    
+    {% if year != currentYear %}
+      {% if currentYear != "" %}
+        </div>
+      {% endif %}
+      
+      <h3 style="margin-top: 2rem; padding: 10px 0; border-bottom: 2px solid #e8e8e8; color: #555;">{{ year }}</h3>
+      <div class="row">
+      
+      {% assign currentYear = year %}
+    {% endif %}
+    
+    <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 mb-4">
+      <div class="card h-100">
+        <video 
+          style="width: 100%; height: 200px; object-fit: cover; background: #000; cursor: pointer;"
+          src="{{ video.path | relative_url | bust_file_cache }}"
+          controls
+          preload="metadata"
+          poster="">
+        </video>
+        <div class="card-body text-center">
+          <h6 class="card-title font-weight-bold" style="font-size: 0.85rem; margin-bottom: 0.5rem;">
+            {{ fileName }}
+          </h6>
+          <p class="card-text text-muted font-weight-light" style="font-size: 0.8rem;">
+            {% if month != "00" and day != "00" %}
+              {{ month }}/{{ day }}/{{ year }}
+            {% else %}
+              Video snippet
+            {% endif %}
+          </p>
         </div>
       </div>
-    {% endfor %}
-  </div>
+    </div>
+  {% endfor %}
+  
+  {% if currentYear != "" %}
+    </div>
+  {% endif %}
+  
 {% else %}
   <div class="text-center text-muted">
     No videos found yet.
