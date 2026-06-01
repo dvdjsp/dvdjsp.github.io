@@ -2,7 +2,6 @@
 
 {% if videos.size > 0 %}
   {% assign currentYear = "" %}
-  
   {% for video in videos %}
     {% assign fileName = video.name | remove: ".mp4" %}
     {% assign dateParts = fileName | split: '-' %}
@@ -19,46 +18,28 @@
     
     {% if year != currentYear %}
       {% if currentYear != "" %}
-        </div>
+</div>
       {% endif %}
-      
       <h3 style="margin-top: 2rem; padding: 10px 0; border-bottom: 2px solid #e8e8e8; color: #555;">{{ year }}</h3>
       <div class="row">
-      
       {% assign currentYear = year %}
     {% endif %}
     
     <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 mb-4">
       <div class="card h-100">
-        <video 
-          style="width: 100%; height: 200px; object-fit: cover; background: #000; cursor: pointer;"
-          src="{{ video.path | relative_url | bust_file_cache }}"
-          controls
-          preload="metadata"
-          poster="">
-        </video>
+        <video style="width: 100%; height: 200px; object-fit: cover; background: #000; cursor: pointer;" src="{{ video.path | relative_url | bust_file_cache }}" controls preload="metadata"></video>
         <div class="card-body text-center">
-          <h6 class="card-title font-weight-bold" style="font-size: 0.85rem; margin-bottom: 0.5rem;">
-            {{ fileName }}
-          </h6>
-          <p class="card-text text-muted font-weight-light" style="font-size: 0.8rem;">
-            {% if month != "00" and day != "00" %}
-              {{ month }}/{{ day }}/{{ year }}
-            {% else %}
-              Video snippet
-            {% endif %}
-          </p>
+          <h6 class="card-title font-weight-bold" style="font-size: 0.85rem; margin-bottom: 0.5rem;">{{ fileName }}</h6>
+          <p class="card-text text-muted font-weight-light" style="font-size: 0.8rem;">{% if month != "00" and day != "00" %}{{ month }}/{{ day }}/{{ year }}{% else %}Video snippet{% endif %}</p>
         </div>
       </div>
     </div>
   {% endfor %}
   
   {% if currentYear != "" %}
-    </div>
+</div>
   {% endif %}
   
 {% else %}
-  <div class="text-center text-muted">
-    No videos found yet.
-  </div>
+  <div class="text-center text-muted">No videos found yet.</div>
 {% endif %}
