@@ -1,21 +1,6 @@
 {% assign videos = site.static_files | where_exp: "video", "video.path contains '/assets/video/' and video.path contains '.mp4'" | sort: "path" | reverse %}
 
 {% if videos.size > 0 %}
-  {% assign grouped_videos = site.emptyArray %}
-  
-  {% for video in videos %}
-    {% assign fileName = video.name | remove: ".mp4" %}
-    {% assign dateParts = fileName | split: '-' %}
-    
-    {% if dateParts.size >= 3 %}
-      {% assign year = dateParts[0] %}
-    {% else %}
-      {% assign year = "Other" %}
-    {% endif %}
-    
-    {% assign video_with_year = video | map: add_key, year %}
-  {% endfor %}
-  
   {% assign currentYear = "" %}
   
   {% for video in videos %}
