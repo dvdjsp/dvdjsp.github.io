@@ -14,7 +14,7 @@
 <div class="row">
 {% assign prev_year = year %}
 {% endif %}
-<div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 mb-4"><div class="card h-100"><video style="width: 100%; height: 200px; object-fit: cover; background: #000; cursor: pointer;" src="{{ video.path | relative_url | bust_file_cache }}" controls preload="metadata"></video><div class="card-body text-center"><h6 class="card-title font-weight-bold" style="font-size: 0.85rem; margin-bottom: 0.5rem;">{{ fileName }}</h6><p class="card-text text-muted font-weight-light" style="font-size: 0.8rem;">{{ month }}/{{ day }}/{{ year }}</p></div></div></div>
+<div class="col-lg-4 col-md-6 col-sm-12 mb-4"><video style="width: 100%; height: 100%; object-fit: cover; background: #000; cursor: pointer; display: block;" src="{{ video.path | relative_url | bust_file_cache }}" controls preload="metadata"></video></div>
 {% endfor %}
 </div>
 {% else %}
