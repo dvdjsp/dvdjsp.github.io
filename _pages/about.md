@@ -2,7 +2,7 @@
 layout: about
 title: About
 permalink: /
-subtitle: <a href='https://www.ualberta.ca/en/physics/research/theoretical-physics-institute/index.html'> Theoretical Physics Institute, University of Alberta</a>
+subtitle: <a href='https://www.ualberta.ca/en/physics/research/theoretical-physics-institute/index.html'> Theoretical Physics Institute</a> & <a href='https://www.quantumhorizonsab.ca/'> Quantum Horizons Alberta</a>
 
 profile:
   align: right
@@ -25,7 +25,7 @@ news: false # includes a list of news items
 selected_papers: false # includes a list of papers marked as "selected={true}"
 social: false # includes social icons at the bottom of the page
 ---
-PhD Student in Physics at the University of Alberta working in Condensed Matter Theory under [Dr. Joseph Maciejko](https://sites.ualberta.ca/~maciejko/). You can find my [academic CV here](https://dvdjsp.github.io./assets/pdf/DavidsonCV.pdf). For **publications & research** and stuff related to the University of Alberta, visit my [UAlberta webpage](https://sites.ualberta.ca/~dd5/).
+PhD Student in Physics at the University of Alberta working in Condensed Matter Theory under [Dr. Joseph Maciejko](https://sites.ualberta.ca/~maciejko/). You can find my [academic CV here](https://sites.ualberta.ca/~dd5/assets/pdf/DavidsonCV.pdf). For **publications,research** and stuff related to the University of Alberta, visit my [UAlberta webpage](https://sites.ualberta.ca/~dd5/).
 
 If the non-empty intersection of graphs and physics interests you, perhaps you might enjoy reading my recently completed Master's thesis titled ["Walks, Spectral Graph Theory and Critical Phenomena on Archimedean Lattices"](https://ualberta.scholaris.ca/items/9f482b9e-929b-4b90-b35e-9498c0e72eed).
 

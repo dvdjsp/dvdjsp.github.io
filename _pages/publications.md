@@ -3,7 +3,7 @@ layout: page
 permalink: /publications/
 title: Publications
 description: 
-nav: true
+nav: false # set to true to show Publications in the navbar
 nav_order: 2
 ---
 
